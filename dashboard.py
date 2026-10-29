@@ -1,6 +1,6 @@
 from http.server import BaseHTTPRequestHandler,ThreadingHTTPServer
 from urllib.parse import urlsplit
-import sqlite3,json,os
+import sqlite3,json,os,socket
 DB=os.environ.get("PAPER_DB", "/data/paper.sqlite3")
 class Handler(BaseHTTPRequestHandler):
  def log_message(self,*args):pass
@@ -19,4 +19,9 @@ class Handler(BaseHTTPRequestHandler):
   else:self.send_response(404);self.end_headers();return
   self.send_response(200);self.send_header("Content-Type",typ);self.send_header("Cache-Control","no-store");self.send_header("X-Content-Type-Options","nosniff");self.send_header("Content-Security-Policy","default-src 'none'; script-src 'unsafe-inline'; style-src 'unsafe-inline'; connect-src 'self'; frame-ancestors 'none'");self.end_headers();self.wfile.write(data)
  def do_POST(self):self.send_response(405);self.end_headers()
-ThreadingHTTPServer(("0.0.0.0",8080),Handler).serve_forever()
+class DualStackServer(ThreadingHTTPServer):
+ address_family=socket.AF_INET6
+ def server_bind(self):
+  self.socket.setsockopt(socket.IPPROTO_IPV6, socket.IPV6_V6ONLY, 0)
+  super().server_bind()
+DualStackServer(("::",8080),Handler).serve_forever()
