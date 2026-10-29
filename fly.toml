@@ -1,0 +1,17 @@
+app = "sphr2k-btc5m-paper"
+primary_region = "ams"
+
+[env]
+  PAPER_DB = "/data/paper.sqlite3"
+
+[mounts]
+  source = "paper_data"
+  destination = "/data"
+
+[[vm]]
+  cpu_kind = "shared"
+  cpus = 1
+  memory = "256mb"
+
+# No HTTP service or public IP by design.
+# Local access: fly proxy 8080:8080 -a sphr2k-btc5m-paper
